@@ -1,0 +1,53 @@
+version: "3.8"
+services: 
+  db:
+    image: mariadb
+    container_name: mariadb
+    restart: always
+    environment:
+      - MARIADB_ALLOW_EMPTY_ROOT_PASSWORD=yes
+      - MARIADB_USER=nicolas
+      - MARIADB_PASSWORD=nicolas-mdp
+      - MARIADB_DATABASE=applifirst
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - dev
+
+  webservice:
+    build: ./webservice
+    container_name: webservice
+    restart: always
+    depends_on:
+      db: 
+        condition: service_healthy
+    volumes: 
+      - app_sources:/appli
+    environment:
+      - HOST=db
+      - USER=nicolas
+      - PASS=nicolas-mdp
+      - NAME=applifirst
+    networks: 
+        - dev
+
+  apache2:
+    build: ./apache
+    container_name: php8_apache
+    restart: always
+    depends_on:
+      - webservice
+      - db
+    volumes: 
+      - app_sources:/var/www/html
+    ports:
+        - 8090:80
+    networks: 
+        - dev
+networks: 
+    dev:
+
+volumes: 
+    app_sources:
