@@ -33,19 +33,29 @@ services:
     networks: 
         - dev
 
-  apache2:
-    build: ./apache
-    container_name: php8_apache
-    restart: always
+  php_fpm: 
+    build: ./php_fpm
+    ports:
+      - "9000:9000"
+    # It is important that both containers can reference the same files
+    volumes:
+      - app_sources:/usr/share/nginx/html
     depends_on:
       - webservice
-      - db
-    volumes: 
-      - app_sources:/var/www/html
+    networks:
+      - dev
+
+  nginx: 
+    build: ./nginx
+    volumes:
+      - app_sources:/usr/share/nginx/html
     ports:
-        - 80:80
-    networks: 
-        - dev
+      - "80:80"
+    depends_on:
+      - php_fpm
+    networks:
+      - dev
+      
 networks: 
     dev:
 
