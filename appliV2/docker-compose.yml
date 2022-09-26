@@ -37,7 +37,6 @@ services:
     build: ./php_fpm
     ports:
       - "9000:9000"
-    # It is important that both containers can reference the same files
     volumes:
       - app_sources:/usr/share/nginx/html
     depends_on:
@@ -55,7 +54,7 @@ services:
       - php_fpm
     networks:
       - dev
-      
+
 networks: 
     dev:
 
